@@ -1,0 +1,41 @@
+version: "2.4"
+
+services:
+  pigen:
+    image: mindspy/pigen:latest
+    container_name: pigen
+    platform: ${platform}
+    privileged: true
+    cap_add:
+      - ALL
+    devices:
+      - /dev:/dev
+    # networks:
+    #   - proxy-net
+    volumes:
+      - /lib/modules:/lib/modules
+      - ./deploy:/pi-gen/deploy
+      - pigen-work:/pi-gen/work
+    environment:
+      - IMG_NAME=raspios
+      # uncomment also networks tags if the proxy port is not published
+      # - APT_PROXY=${PKG_PROXY}
+      # - STAGE_LIST=stage0
+
+  dev:
+    extends:
+      service: pigen
+    image: mindspy/pigen:dev
+    container_name: pigen-dev
+    entrypoint:
+      - sleep
+      - infinity
+
+volumes:
+  pigen-work:
+    name: pigen-work
+
+# networks:
+#   proxy-net:
+#     name: ${PKG_PROXY_NET}
+#     external: true
