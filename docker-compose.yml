@@ -4,7 +4,6 @@ services:
   pigen:
     image: mindspy/pigen:latest
     container_name: pigen
-    platform: ${platform}
     privileged: true
     cap_add:
       - ALL
@@ -20,7 +19,34 @@ services:
       - IMG_NAME=raspios
       # uncomment also networks tags if the proxy port is not published
       # - APT_PROXY=${PKG_PROXY}
-      # - STAGE_LIST=stage0
+      - STAGE_LIST=stage0 stage1 stage2
+
+
+  pigen-stage:
+    extends:
+      service: pigen
+    image: mindspy/pigen
+    platform: ${platform}
+    container_name: pigen-stage
+    volumes:
+      - /lib/modules:/lib/modules
+      - ./deploy:/pi-gen/deploy
+      - pigen-work:/pi-gen/work
+      - ./EMPTY:/pi-gen/stage2/SKIP_IMAGES:ro
+    entrypoint:
+      - sleep
+      - infinity
+
+  pigen-export:
+    extends:
+      service: pigen
+    image: mindspy/pigen
+    container_name: pigen-export
+    volumes:
+      - ./EMPTY:/pi-gen/stage2/SKIP:ro
+    entrypoint:
+      - sleep
+      - infinity
 
   dev:
     extends:
