@@ -4,11 +4,14 @@ services:
   pigen:
     image: mindspy/pigen:latest
     container_name: pigen
-    privileged: true
     cap_add:
-      - ALL
+      - SYS_ADMIN
+      - SYS_CHROOT
+      - CAP_MKNOD
     devices:
-      - /dev:/dev
+      - /dev
+    device_cgroup_rules:
+      - b 7:* rmw
     # networks:
     #   - proxy-net
     volumes:
@@ -21,32 +24,24 @@ services:
       # - APT_PROXY=${PKG_PROXY}
       - STAGE_LIST=stage0 stage1 stage2
 
-
   pigen-stage:
     extends:
       service: pigen
     image: mindspy/pigen:latest-stage
-    platform: ${platform}
+    # platform: ${platform}
     container_name: pigen-stage
-    volumes:
-      - /lib/modules:/lib/modules
-      - ./deploy:/pi-gen/deploy
-      - pigen-work:/pi-gen/work
-      - ./EMPTY:/pi-gen/stage2/SKIP_IMAGES:ro
-    entrypoint:
-      - sleep
-      - infinity
+    environment:
+      - STAGE_LIST=stage0 stage1 stage2
+      - STAGE_PREFIX=stage
 
   pigen-export:
     extends:
       service: pigen
     image: mindspy/pigen:latest-export
     container_name: pigen-export
-    volumes:
-      - ./EMPTY:/pi-gen/stage2/SKIP:ro
-    entrypoint:
-      - sleep
-      - infinity
+    environment:
+      - STAGE_LIST=stage2
+      - STAGE_PREFIX=export
 
   dev:
     extends:
