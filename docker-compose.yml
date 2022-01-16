@@ -25,7 +25,7 @@ services:
   pigen-stage:
     extends:
       service: pigen
-    image: mindspy/pigen
+    image: mindspy/pigen:latest-stage
     platform: ${platform}
     container_name: pigen-stage
     volumes:
@@ -40,7 +40,7 @@ services:
   pigen-export:
     extends:
       service: pigen
-    image: mindspy/pigen
+    image: mindspy/pigen:latest-export
     container_name: pigen-export
     volumes:
       - ./EMPTY:/pi-gen/stage2/SKIP:ro

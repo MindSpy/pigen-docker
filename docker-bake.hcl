@@ -12,7 +12,11 @@ group "default" {
 
 target "latest" {
   inherits = ["pigen"]
-  tags = [ "mindspy/pigen:latest" ]
+  tags = [ 
+    "mindspy/pigen:latest",
+    "mindspy/pigen:latest-stage",
+    "mindspy/pigen:latest-export"
+  ]
 }
 
 target "date" {
