@@ -18,7 +18,10 @@ for arg in "$@"; do
     --platform=*)
         platform="${arg#*=}"
         ;;
-    --print | --load | --no-cache) 
+    --progress=*)
+        progress="${arg}"
+        ;;
+    --print | --load | --no-cache | --pull | --set*)
         BAKE_ARGS="$BAKE_ARGS $arg"
         ;;
     *)
@@ -47,11 +50,16 @@ if ! docker buildx ls | grep ^$BUILDER_NAME -c > /dev/null 2>&1; then
     docker run --privileged --rm tonistiigi/binfmt --install all
 
     DRIVER_OPTS=""
-    if [ -n "${PKG_PROXY_NET}" ]; then
-        DRIVER_OPTS="--driver-opt network=${PKG_PROXY_NET}"
+    if [ -n "${PKG_PROXY_NET}" ]
+    then DRIVER_OPTS="--driver-opt network=${PKG_PROXY_NET}"
     fi
-
-    docker buildx create --name $BUILDER_NAME --use --driver docker-container $DRIVER_OPTS
+    if [ -n "${PKG_PROXY}" ]
+    then DRIVER_OPTS="$DRIVER_OPTS --driver-opt env.http_proxy=${PKG_PROXY} --driver-opt env.https_proxy=${PKG_PROXY}"
+    else if [ -n "$http_proxy" ]
+         then DRIVER_OPTS="$DRIVER_OPTS --driver-opt env.http_proxy=${http_proxy} --driver-opt env.https_proxy=${http_proxy}"
+         fi
+    fi
+    docker buildx create --name $BUILDER_NAME --node $BUILDER_NAME --use --driver docker-container $DRIVER_OPTS
     docker buildx inspect --bootstrap
 fi
 
@@ -64,12 +72,18 @@ else
 fi
 
 if [ -z "${GIT_BRANCH}" -o "${GIT_BRANCH}" == "DIRTY" ]; then
-  BAKE_ARGS="$BAKE_ARGS --progress=plain --load --set *.platform=${platform:-${default_platform}} dev"
+  if [ -z "$targets" ]
+  then targets=dev
+   fi
+  if [ -z "$progress" ]
+  then progress="--progress=plain"
+  fi
+  BAKE_ARGS="$BAKE_ARGS ${progress} --load --set *.platform=${platform:-${default_platform}} $targets"
 else
   if [ -n "$platform" ]; then
     BAKE_ARGS="$BAKE_ARGS --set *.platform=${platform}"
   fi
-  BAKE_ARGS="$BAKE_ARGS --push $targets"
+  BAKE_ARGS="$BAKE_ARGS --push $progress $targets"
 fi
 
 docker buildx bake -f docker-bake.hcl $BAKE_ARGS
