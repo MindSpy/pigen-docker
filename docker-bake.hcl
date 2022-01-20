@@ -32,7 +32,7 @@ target "dev" {
 target "raspios" {
   inherits = [ "pigen" ]
   platforms = [ 
-    "linux/arm64", "linux/arm/v7"
+    "linux/arm64/v8", "linux/arm/v7"
     ]
   dockerfile = "raspios.Dockerfile"
   tags = [ 
@@ -44,7 +44,7 @@ target "raspios" {
 target "pigen" {
   platforms = [ 
     "linux/amd64", "linux/386",
-    "linux/arm64", "linux/arm/v6", "linux/arm/v7"
+    "linux/arm64/v8", "linux/arm/v7"
     ]
   context = "."
   tags = [ "mindspy/pigen:${PIGEN_VER}" ]
