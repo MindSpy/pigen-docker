@@ -29,6 +29,18 @@ target "dev" {
   inherits = ["pigen"]
 }
 
+target "raspios" {
+  inherits = [ "pigen" ]
+  platforms = [ 
+    "linux/arm64", "linux/arm/v7"
+    ]
+  dockerfile = "raspios.Dockerfile"
+  tags = [ 
+    "mindspy/raspios:latest", 
+    "mindspy/raspios:bullseye" 
+    ]
+}
+
 target "pigen" {
   platforms = [ 
     "linux/amd64", "linux/386",
@@ -37,6 +49,7 @@ target "pigen" {
   context = "."
   tags = [ "mindspy/pigen:${PIGEN_VER}" ]
   args = {
+      RELEASE = "bullseye"
       PKG_PROXY = "${PKG_PROXY}"
       PIGEN_REPO = "${PIGEN_REPO}"
       PIGEN_VER = "${PIGEN_VER}"

@@ -1,0 +1,3 @@
+deb [signed-by=/usr/share/keyrings/raspberrypi.gpg] http://archive.raspberrypi.org/debian/ RELEASE main
+# Uncomment line below then 'apt-get update' to enable 'apt-get source'
+#deb-src [signed-by=/usr/share/keyrings/raspberrypi.gpg] http://archive.raspberrypi.org/debian/ RELEASE main

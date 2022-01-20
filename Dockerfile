@@ -1,20 +1,19 @@
 
 ARG platform=$TARGETPLATFORM
+ARG RELEASE=bullseye
 
-FROM --platform=${platform} debian:bullseye
+FROM --platform=${platform} debian:${RELEASE}
 
 ENV DEBIAN_FRONTEND noninteractive
 
 ARG PKG_PROXY
-ARG USE_QEMU=0
 ARG PIGEN_REPO
 ARG PIGEN_VER
 
 RUN set -ex \
   # set build-time proxy
-  ; if [ -n "$PKG_PROXY" ]  \
-  ; then echo "Acquire::http::Proxy \"$PKG_PROXY\";" >> /etc/apt/apt.conf.d/01proxybuild \
-  ; fi \
+  ; apt_conf=/etc/apt/apt.conf.d/01tmpproxy-$(shuf  -i 1000-9999 -n1) \
+  ; test -n "$PKG_PROXY" && echo "Acquire::http::Proxy \"$PKG_PROXY\";" > $apt_conf \
   # required packages
   ; apt-get -y update \
   ; apt-get -y install --no-install-recommends \
@@ -29,7 +28,7 @@ RUN set -ex \
   ; git checkout ${PIGEN_VER} > /dev/null \
   # cleanup
   ; apt-get clean \
-  ; rm /etc/apt/apt.conf.d/01proxybuild || true \
+  ; rm $apt_conf || true \
   ; rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
 
 COPY docker-entrypoint.sh /
