@@ -24,7 +24,7 @@ RUN set -ex \
     *) echo "Unexpected platform ${platform}. Should be one of: linux/arm/v7 or linux/arm64."; exit 1 ;; \
     esac \
     ; echo "Bootstraping on $(dpkg --print-architecture) for target $ARCH." \
-    ; setarch linux32 debootstrap --foreign --arch $ARCH --components main,contrib,non-free --variant=minbase \
+    ; debootstrap --foreign --arch $ARCH --components main,contrib,non-free --variant=minbase \
     --exclude=info,e2fsprogs,libext2fs2,libss2,logsave,gcc-7-base,gcc-8-base,gcc-9-base,tzdata \
     $ARGS $RELEASE /rootfs $REPO \ 
     ; env --unset http_proxy || true \
@@ -34,7 +34,7 @@ RUN set -ex \
 
 FROM --platform=${platform} scratch as bootstrap
 # use separate stage instead of chroot 
-# this is intermediate stage as it containes lot of cached content in first layer
+# this contains lot of clutter and cached contents
 
 COPY --from=prep /rootfs /
 COPY files /build
