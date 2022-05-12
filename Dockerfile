@@ -19,7 +19,7 @@ RUN set -ex \
   ; apt-get -y install --no-install-recommends \
   git vim parted quilt coreutils debootstrap zerofree zip dosfstools \
   libarchive-tools libcap2-bin rsync grep udev xz-utils curl xxd file kmod bc\
-  ca-certificates qemu-utils kpartx qemu-user-static \
+  ca-certificates qemu-utils kpartx qemu-user-static fdisk gpg pigz \
   # clone and export the pi-gen repo
   ; git clone ${PIGEN_REPO} /pi-gen \
   ; mkdir -p /pi-gen/work /pi-gen/deploy \
