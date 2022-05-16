@@ -1,0 +1,6 @@
+retry_connrefused=on
+continue=on
+wait_retry=5
+read_timeout=20
+timeout=15
+tries=5

@@ -26,15 +26,17 @@ RUN set -ex \
 ARG PIGEN_REPO
 ARG PIGEN_VER
 
+COPY pigen-files/ /
+
 RUN set -ex \
   # clone and export the pi-gen repo
   ; git clone ${PIGEN_REPO} /pi-gen \
   ; mkdir -p /pi-gen/work /pi-gen/deploy \
   ; cd /pi-gen \
-  # ; git config advice.detachedHead false \
-  ; git checkout ${PIGEN_VER} > /dev/null
-
-COPY docker-entrypoint.sh /
+  ; git config advice.detachedHead false \
+  ; git checkout ${PIGEN_VER} > /dev/null \
+  # fix wget errors during bootstrapping
+  ; cat /etc/wgetrc.add >> /etc/wgetrc 
 
 WORKDIR /pi-gen
 
