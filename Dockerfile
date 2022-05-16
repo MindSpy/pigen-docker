@@ -7,8 +7,6 @@ FROM --platform=${platform} debian:${RELEASE}
 ENV DEBIAN_FRONTEND noninteractive
 
 ARG PKG_PROXY
-ARG PIGEN_REPO
-ARG PIGEN_VER
 
 RUN set -ex \
   # set build-time proxy
@@ -19,17 +17,22 @@ RUN set -ex \
   ; apt-get -y install --no-install-recommends \
   git vim parted quilt coreutils debootstrap zerofree zip dosfstools \
   libarchive-tools libcap2-bin rsync grep udev xz-utils curl xxd file kmod bc\
-  ca-certificates qemu-utils kpartx qemu-user-static fdisk gpg pigz \
+  ca-certificates qemu-utils kpartx qemu-user-static fdisk gpg pigz  \
+  # cleanup
+  ; apt-get clean \
+  ; rm $apt_conf || true \
+  ; rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
+
+ARG PIGEN_REPO
+ARG PIGEN_VER
+
+RUN set -ex \
   # clone and export the pi-gen repo
   ; git clone ${PIGEN_REPO} /pi-gen \
   ; mkdir -p /pi-gen/work /pi-gen/deploy \
   ; cd /pi-gen \
   # ; git config advice.detachedHead false \
-  ; git checkout ${PIGEN_VER} > /dev/null \
-  # cleanup
-  ; apt-get clean \
-  ; rm $apt_conf || true \
-  ; rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
+  ; git checkout ${PIGEN_VER} > /dev/null
 
 COPY docker-entrypoint.sh /
 
