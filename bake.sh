@@ -4,6 +4,10 @@ env_file=env.hcl
 BUILDER_NAME=multiarch
 BAKE_ARGS=""
 default_platform=linux/arm/v7
+COPY_CERTS=0
+default_hcl=docker-bake.hcl
+force_push=0
+
 for arg in "$@"; do
   case "$arg" in
     --env=*) 
@@ -12,16 +16,25 @@ for arg in "$@"; do
     --builder=*) 
         BUILDER_NAME="${arg#*=}"
         ;;
+    --copy-ca-certs)
+        COPY_CERTS=1
+        ;;
     --targets=*) 
         targets="${arg#*=}"
         ;;
     --platform=*)
         platform="${arg#*=}"
         ;;
+    --hcl=*)
+        hcl="${arg#*=}"
+        ;;
+    --push)
+        force_push=1
+        ;;
     --progress=*)
         progress="${arg}"
         ;;
-    --print | --load | --no-cache | --pull | --set*)
+    --print | --load | --pull | --no-cache | --set*)
         BAKE_ARGS="$BAKE_ARGS $arg"
         ;;
     *)
@@ -61,8 +74,12 @@ if ! docker buildx ls | grep ^$BUILDER_NAME -c > /dev/null 2>&1; then
     fi
     docker buildx create --name $BUILDER_NAME --node $BUILDER_NAME --use --driver docker-container $DRIVER_OPTS
     docker buildx inspect --bootstrap
-fi
 
+    if [ "$COPY_CERTS" = "1" ]
+    then docker cp /etc/ssl/certs/ buildx_buildkit_multiarch:/etc/ssl/
+         docker exec -it buildx_buildkit_multiarch c_rehash -v
+    fi
+fi
 # override env variables
 BUILD_DATE="$(date +%Y%m%d)"
 if [ -n "$(git status -s)" ]; then
@@ -71,7 +88,7 @@ else
   GIT_BRANCH=$(git rev-parse --short HEAD)
 fi
 
-if [ -z "${GIT_BRANCH}" -o "${GIT_BRANCH}" == "DIRTY" ]; then
+if [ "${force_push}" -eq 0 ] && [ -z "${GIT_BRANCH}" -o "${GIT_BRANCH}" == "DIRTY" ]; then
   if [ -z "$targets" ]
   then targets=dev
    fi
@@ -86,4 +103,4 @@ else
   BAKE_ARGS="$BAKE_ARGS --push $progress $targets"
 fi
 
-docker buildx bake -f docker-bake.hcl $BAKE_ARGS
+docker buildx bake -f ${hcl:-${default_hcl}} $BAKE_ARGS
