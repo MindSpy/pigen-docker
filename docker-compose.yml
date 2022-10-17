@@ -23,12 +23,15 @@ services:
       # uncomment also networks tags if the proxy port is not published
       # - APT_PROXY=${PKG_PROXY}
       - STAGE_LIST=stage0 stage1 stage2
+      - LOCALE_DEFAULT=en_US.UTF-8
+      - ENABLE_SSH=1
+      - DEPLOY_COMPRESSION=xz
 
   pigen-stage:
     extends:
       service: pigen
     image: mindspy/pigen:latest-stage
-    # platform: ${platform}
+    platform: ${platform}
     container_name: pigen-stage
     environment:
       - STAGE_LIST=stage0 stage1 stage2
